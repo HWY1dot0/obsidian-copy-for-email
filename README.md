@@ -12,10 +12,13 @@ Plain markdown copied out of Obsidian pastes as raw syntax (`**bold**`, `# headi
 
 ## Usage
 
-- **Copy selection** — command palette, or right-click a selection → *Copy for email* (editing view).
+- **Copy selection** — command palette, or right-click a selection → *Copy for email* (editing view). Works in reading view too: select rendered text, then run the command.
 - **Copy note** — copies the active note (frontmatter excluded; optionally prepends the title).
 
 Then paste into your mail compose window.
+
+> [!note]
+> A plain `Cmd/Ctrl+C` is still Obsidian's native copy (markdown text, or theme-styled HTML from reading view, which mail clients render poorly). Use the plugin command or menu item to get the email-ready version.
 
 ## What maps to what
 
@@ -36,7 +39,6 @@ Then paste into your mail compose window.
 - Pasted data-URI images work in Gmail, Apple Mail, Outlook for Mac and new Outlook. Classic Outlook for Windows may not display them while composing; recipients are unaffected when sending from the supported clients.
 - Diagrams are rasterized against your current Obsidian background, so they always stay readable; for light-styled diagrams in email, use a light theme.
 - On mobile, diagrams/math degrade to a `[diagram]` placeholder (iOS cannot reliably rasterize off-screen renders); text, tables and images copy fine.
-- Copying a selection works in editing views; in reading view, use **Copy note**.
 
 ## Install
 
