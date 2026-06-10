@@ -1,7 +1,7 @@
 {
   "id": "copy-for-email",
   "name": "Copy for Email",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.5.0",
   "description": "Copy selections or whole notes as email-ready rich text. Tables, callouts, code and Mermaid diagrams survive pasting into Gmail, Outlook and Apple Mail; chat apps get clean plain text.",
   "author": "HWY1dot0",

@@ -3,21 +3,22 @@
  *
  * Static rules live here (the plugin guidelines disallow runtime <style>
  * injection); only dynamic positioning/sizing stays inline in render.ts.
- * Everything is scoped to .copy-for-email-inner so it can never affect the
- * rest of the app.
+ * Everything is scoped under .copy-for-email-offscreen so it can never
+ * affect the rest of the app. Specificity (0,3,0) outweighs the app's
+ * .markdown-preview-view rules without needing !important.
  */
 
-.copy-for-email-inner,
-.copy-for-email-inner.markdown-preview-view,
-.copy-for-email-inner.markdown-rendered {
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
+.copy-for-email-offscreen .copy-for-email-inner.markdown-preview-view.markdown-rendered,
+.copy-for-email-offscreen .copy-for-email-inner.markdown-preview-view,
+.copy-for-email-offscreen .copy-for-email-inner {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
 }
 
-.copy-for-email-inner > :last-child {
-  margin-bottom: 0 !important;
+.copy-for-email-offscreen .copy-for-email-inner > :last-child {
+  margin-bottom: 0;
 }
