@@ -12,7 +12,7 @@ import {
 import { writeRichClipboard } from './clipboard';
 import { buildEmailHtml, emailify, EmailifyStats, stripEmailAttributes } from './emailify';
 import { toPlainText } from './plaintext';
-import { renderMarkdownOffscreen } from './render';
+import { RenderedMarkdown, renderMarkdownOffscreen, renderSelectionOffscreen } from './render';
 import { CopyForEmailSettings, DEFAULT_SETTINGS } from './settings';
 
 const LARGE_CLIPBOARD_BYTES = 8 * 1024 * 1024;
@@ -27,8 +27,13 @@ export default class CopyForEmailPlugin extends Plugin {
     this.addCommand({
       id: 'copy-selection',
       name: 'Copy selection',
-      editorCallback: (editor: Editor, ctx: MarkdownView | MarkdownFileInfo) => {
-        void this.copySelection(editor, ctx);
+      // checkCallback (not editorCallback) so the command also works in
+      // reading view, where the selection lives in the preview DOM.
+      checkCallback: (checking: boolean) => {
+        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (!view) return false;
+        if (!checking) void this.copySelection(view.editor, view);
+        return true;
       },
     });
 
@@ -62,11 +67,26 @@ export default class CopyForEmailPlugin extends Plugin {
 
   private async copySelection(editor: Editor, ctx: MarkdownView | MarkdownFileInfo): Promise<void> {
     const markdown = editor.getSelection();
-    if (!markdown.trim()) {
-      new Notice('Select some text first, or use "Copy note".');
+    if (markdown.trim()) {
+      await this.runCopy(markdown, ctx.file?.path ?? '');
       return;
     }
-    await this.runCopy(markdown, ctx.file?.path ?? '');
+    // Reading view: the selection is rendered DOM, not editor text.
+    if (await this.copyDomSelection(ctx)) return;
+    new Notice('Select some text first, or use "Copy note".');
+  }
+
+  // Copy an already-rendered selection (reading view) by cloning the live DOM
+  // and running it through the same email pipeline.
+  private async copyDomSelection(ctx: MarkdownView | MarkdownFileInfo): Promise<boolean> {
+    const sel = activeWindow.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
+    const range = sel.getRangeAt(0);
+    const node = range.commonAncestorContainer;
+    const el = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement;
+    if (!el?.closest('.markdown-preview-view')) return false;
+    await this.runCopyPipeline(() => renderSelectionOffscreen(range), ctx.file?.path ?? '');
+    return true;
   }
 
   private async copyNote(file: TFile): Promise<void> {
@@ -83,6 +103,10 @@ export default class CopyForEmailPlugin extends Plugin {
   }
 
   private async runCopy(markdown: string, sourcePath: string): Promise<void> {
+    await this.runCopyPipeline(() => renderMarkdownOffscreen(this.app, markdown, sourcePath), sourcePath);
+  }
+
+  private async runCopyPipeline(build: () => Promise<RenderedMarkdown>, sourcePath: string): Promise<void> {
     if (this.running) {
       new Notice('A copy is already in progress.');
       return;
@@ -90,7 +114,7 @@ export default class CopyForEmailPlugin extends Plugin {
     this.running = true;
 
     try {
-      const rendered = await renderMarkdownOffscreen(this.app, markdown, sourcePath);
+      const rendered = await build();
       try {
         const rasterBg = resolveRasterBackground(rendered.wrap);
         const stats = await emailify(this.app, rendered.inner, sourcePath, this.settings, rasterBg);

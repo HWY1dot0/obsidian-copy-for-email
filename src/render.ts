@@ -16,16 +16,7 @@ export interface RenderedMarkdown {
   dispose: () => void;
 }
 
-/**
- * Render markdown into an off-screen, attached container and wait for the
- * asynchronous parts (Mermaid, MathJax, images, fonts) to settle. The caller
- * MUST call dispose() when done.
- */
-export async function renderMarkdownOffscreen(
-  app: App,
-  markdown: string,
-  sourcePath: string,
-): Promise<RenderedMarkdown> {
+function createOffscreenContainer(): { wrap: HTMLDivElement; inner: HTMLDivElement } {
   const wrap = activeDocument.createElement('div');
   wrap.className = 'copy-for-email-offscreen';
   // Positioning/sizing is runtime state, so it stays inline; everything
@@ -50,6 +41,21 @@ export async function renderMarkdownOffscreen(
   wrap.appendChild(inner);
   activeDocument.body.appendChild(wrap);
 
+  return { wrap, inner };
+}
+
+/**
+ * Render markdown into an off-screen, attached container and wait for the
+ * asynchronous parts (Mermaid, MathJax, images, fonts) to settle. The caller
+ * MUST call dispose() when done.
+ */
+export async function renderMarkdownOffscreen(
+  app: App,
+  markdown: string,
+  sourcePath: string,
+): Promise<RenderedMarkdown> {
+  const { wrap, inner } = createOffscreenContainer();
+
   // Short-lived Component scoped to this render, unloaded in dispose(), so
   // transient child renderers are not retained for the plugin's lifetime.
   const component = new Component();
@@ -62,6 +68,29 @@ export async function renderMarkdownOffscreen(
   try {
     await MarkdownRenderer.render(app, markdown, inner, sourcePath, component);
     await waitForDynamicBlocks(inner);
+    await waitForAssets(inner);
+    await nextAnimationFrame();
+  } catch (e) {
+    dispose();
+    throw e;
+  }
+
+  return { wrap, inner, dispose };
+}
+
+/**
+ * Build the off-screen container from an already-rendered selection (reading
+ * view). The clone is attached and laid out so diagrams can still be measured
+ * and rasterized; Mermaid/MathJax are already processed in the live DOM.
+ */
+export async function renderSelectionOffscreen(range: Range): Promise<RenderedMarkdown> {
+  const { wrap, inner } = createOffscreenContainer();
+  inner.appendChild(range.cloneContents());
+  const dispose = (): void => {
+    wrap.remove();
+  };
+
+  try {
     await waitForAssets(inner);
     await nextAnimationFrame();
   } catch (e) {
