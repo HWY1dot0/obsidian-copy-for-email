@@ -263,7 +263,7 @@ async function rasterizeDynamicBlocks(
         img.alt = 'formula';
         img.setAttribute('width', String(Math.round(rect.width)));
         img.setAttribute('height', String(Math.round(rect.height)));
-        img.setAttribute('style', 'vertical-align: middle;');
+        img.setCssStyles({ verticalAlign: 'middle' });
         replaceTarget.replaceWith(img);
       } else {
         replaceTarget.replaceWith(makeBlockImage(dataUrl, rect.width, isMath ? 'formula' : 'diagram'));
@@ -279,19 +279,19 @@ async function rasterizeDynamicBlocks(
 
 function makeBlockImage(dataUrl: string, cssWidth: number, alt: string): HTMLElement {
   const holder = activeDocument.createElement('div');
-  holder.setAttribute('style', 'margin: 0 0 14px;');
+  holder.setCssStyles({ margin: '0 0 14px' });
   const img = activeDocument.createElement('img');
   img.src = dataUrl;
   img.alt = alt;
   if (cssWidth > 0) img.setAttribute('width', String(Math.round(cssWidth)));
-  img.setAttribute('style', 'max-width: 100%; height: auto;');
+  img.setCssStyles({ maxWidth: '100%', height: 'auto' });
   holder.appendChild(img);
   return holder;
 }
 
 function makePlaceholder(text: string): HTMLElement {
   const span = activeDocument.createElement('span');
-  span.setAttribute('style', `color: ${MUTED}; font-style: italic;`);
+  span.setCssStyles({ color: MUTED, fontStyle: 'italic' });
   span.textContent = text;
   return span;
 }
@@ -317,13 +317,13 @@ function transformCallouts(root: HTMLElement): void {
       'style',
       `${BASE_TEXT_STYLE} margin: 0 0 14px; padding: 12px 16px; border-left: 4px solid ${colors.border}; border-radius: 5px; background: ${colors.bg};`,
     );
-    const title = callout.querySelector('.callout-title');
+    const title = callout.querySelector<HTMLElement>('.callout-title');
     if (title) {
-      title.setAttribute('style', `font-weight: 600; color: ${colors.border}; margin: 0 0 6px;`);
+      title.setCssStyles({ fontWeight: '600', color: colors.border, margin: '0 0 6px' });
     }
-    const content = callout.querySelector('.callout-content');
+    const content = callout.querySelector<HTMLElement>('.callout-content');
     if (content) {
-      content.setAttribute('style', 'margin: 0;');
+      content.setCssStyles({ margin: '0' });
       const lastChild = content.lastElementChild;
       if (lastChild) prependCss(lastChild, 'margin-bottom: 0;');
     }
