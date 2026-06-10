@@ -1,0 +1,23 @@
+/*
+ * copy-for-email: styles for the off-screen render container.
+ *
+ * Static rules live here (the plugin guidelines disallow runtime <style>
+ * injection); only dynamic positioning/sizing stays inline in render.ts.
+ * Everything is scoped to .copy-for-email-inner so it can never affect the
+ * rest of the app.
+ */
+
+.copy-for-email-inner,
+.copy-for-email-inner.markdown-preview-view,
+.copy-for-email-inner.markdown-rendered {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+.copy-for-email-inner > :last-child {
+  margin-bottom: 0 !important;
+}
