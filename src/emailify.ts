@@ -163,9 +163,22 @@ export async function emailify(
   await transformImages(app, inner, sourcePath, settings, stats);
   colorizeCodeTokens(inner);
   applyStyleMap(inner);
-  stripAttributes(inner);
 
   return stats;
+}
+
+/**
+ * Remove every attribute mail clients don't need. Runs as a separate step so
+ * the plain-text serializer can still see classes (e.g. callout titles).
+ */
+export function stripEmailAttributes(root: HTMLElement): void {
+  for (const el of Array.from(root.querySelectorAll('*'))) {
+    for (const attr of Array.from(el.attributes)) {
+      if (!ATTR_WHITELIST.has(attr.name.toLowerCase())) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  }
 }
 
 /** Move the transformed content into a styled wrapper and serialize it. */
@@ -238,6 +251,7 @@ async function rasterizeDynamicBlocks(
       continue;
     }
 
+    const isMath = target.tagName.toLowerCase() === 'mjx-container';
     try {
       const dataUrl = await domToPng(target as HTMLElement, {
         scale: settings.diagramScale,
@@ -252,13 +266,13 @@ async function rasterizeDynamicBlocks(
         img.setAttribute('style', 'vertical-align: middle;');
         replaceTarget.replaceWith(img);
       } else {
-        replaceTarget.replaceWith(makeBlockImage(dataUrl, rect.width, 'diagram'));
+        replaceTarget.replaceWith(makeBlockImage(dataUrl, rect.width, isMath ? 'formula' : 'diagram'));
       }
       stats.diagrams += 1;
     } catch (e) {
       console.warn('[copy-for-email] diagram rasterization failed', e);
-      replaceTarget.replaceWith(makePlaceholder('[diagram]'));
-      stats.skipped.push('diagram');
+      replaceTarget.replaceWith(makePlaceholder(isMath ? '[formula]' : '[diagram]'));
+      stats.skipped.push(isMath ? 'formula' : 'diagram');
     }
   }
 }
@@ -503,16 +517,6 @@ function applyStyleMap(root: HTMLElement): void {
 function prependCss(el: Element, css: string): void {
   const existing = el.getAttribute('style');
   el.setAttribute('style', existing ? `${css};${existing}` : css);
-}
-
-function stripAttributes(root: HTMLElement): void {
-  for (const el of Array.from(root.querySelectorAll('*'))) {
-    for (const attr of Array.from(el.attributes)) {
-      if (!ATTR_WHITELIST.has(attr.name.toLowerCase())) {
-        el.removeAttribute(attr.name);
-      }
-    }
-  }
 }
 
 function arrayBufferToBase64(buf: ArrayBuffer): string {
