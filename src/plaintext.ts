@@ -62,10 +62,18 @@ function blockText(el: Element, listDepth: number): string {
     case 'br':
       return '\n';
     case 'img':
-      return imageText(el);
+      return `${imageText(el)}\n\n`;
     default:
       if (BLOCK_TAGS.has(tag)) {
-        return blockChildren(el, listDepth);
+        // Callout titles read better marked, and must not run into the body.
+        if (el.classList.contains('callout-title')) {
+          const title = inlineText(el).trim();
+          return title ? `【${title}】\n` : '';
+        }
+        // A container whose content ended inline (e.g. a div wrapping an
+        // image or bare text) still needs to terminate its line.
+        const out = blockChildren(el, listDepth);
+        return out && !out.endsWith('\n') ? `${out}\n` : out;
       }
       return inlineText(el);
   }
@@ -121,11 +129,12 @@ function tableText(table: Element): string {
   return out;
 }
 
+// Inline form; block-level callers add their own line breaks.
 function imageText(el: Element): string {
   const alt = el.getAttribute('alt');
-  if (alt === 'diagram' || alt === 'chart') return '[diagram]\n\n';
+  if (alt === 'diagram' || alt === 'chart') return '[diagram]';
   if (alt === 'formula') return '[formula]';
-  return `[image${alt ? `: ${alt}` : ''}]\n\n`;
+  return `[image${alt ? `: ${alt}` : ''}]`;
 }
 
 function inlineText(el: Element): string {
@@ -141,7 +150,7 @@ function inlineText(el: Element): string {
     if (tag === 'br') {
       out += '\n';
     } else if (tag === 'img') {
-      out += imageText(child).replace(/\n+$/, '');
+      out += imageText(child);
     } else if (tag === 'a') {
       const href = child.getAttribute('href') ?? '';
       const text = inlineText(child).trim();

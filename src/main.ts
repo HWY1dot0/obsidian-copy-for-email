@@ -10,7 +10,7 @@ import {
   TFile,
 } from 'obsidian';
 import { writeRichClipboard } from './clipboard';
-import { buildEmailHtml, emailify, EmailifyStats } from './emailify';
+import { buildEmailHtml, emailify, EmailifyStats, stripEmailAttributes } from './emailify';
 import { toPlainText } from './plaintext';
 import { renderMarkdownOffscreen } from './render';
 import { CopyForEmailSettings, DEFAULT_SETTINGS } from './settings';
@@ -94,7 +94,9 @@ export default class CopyForEmailPlugin extends Plugin {
       try {
         const rasterBg = resolveRasterBackground(rendered.wrap);
         const stats = await emailify(this.app, rendered.inner, sourcePath, this.settings, rasterBg);
+        // Plain text first: it still wants the classes that strip removes.
         const text = toPlainText(rendered.inner);
+        stripEmailAttributes(rendered.inner);
         const html = buildEmailHtml(rendered.inner);
         const mode = await writeRichClipboard(html, text);
         this.showResult(mode, stats, html.length);
