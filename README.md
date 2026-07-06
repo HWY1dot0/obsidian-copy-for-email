@@ -2,7 +2,7 @@
 
 Copy a selection or a whole note as **email-ready rich text**. Paste it into Gmail, Outlook, Apple Mail, Word or a WeChat official-account editor and the formatting survives — headings, tables, callouts, highlighted code, task lists, and even Mermaid diagrams and math (converted to images).
 
-![Copy for Email demo — select, right-click, Copy for email, paste into a mail-ready document with formatting intact](./images/demo.gif)
+![Copy for Email demo — select, right-click, Copy for email, paste into a mail-ready document with formatting intact](https://raw.githubusercontent.com/HWY1dot0/obsidian-copy-for-email/main/images/demo.gif)
 
 Plain markdown copied out of Obsidian pastes as raw syntax (`**bold**`, `# heading`, `| tables |`). Existing "copy as HTML" approaches rely on classes and `<style>` blocks, which mail clients strip on paste. This plugin instead:
 
