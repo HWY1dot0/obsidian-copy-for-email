@@ -2,6 +2,8 @@
 
 Copy a selection or a whole note as **email-ready rich text**. Paste it into Gmail, Outlook, Apple Mail, Word or a WeChat official-account editor and the formatting survives — headings, tables, callouts, highlighted code, task lists, and even Mermaid diagrams and math (converted to images).
 
+![Copy for Email demo — select, right-click, Copy for email, paste into a mail-ready document with formatting intact](./images/demo.gif)
+
 Plain markdown copied out of Obsidian pastes as raw syntax (`**bold**`, `# heading`, `| tables |`). Existing "copy as HTML" approaches rely on classes and `<style>` blocks, which mail clients strip on paste. This plugin instead:
 
 - **Inlines every style** on every element — the only formatting mail clients reliably keep.
@@ -42,7 +44,25 @@ Then paste into your mail compose window.
 
 ## Install
 
-Manual: download `main.js`, `manifest.json`, `styles.css` from the latest release into `<vault>/.obsidian/plugins/copy-for-email/`, then enable it in *Settings → Community plugins*.
+Copy for Email is available in the Obsidian **Community Plugins** directory:
+
+1. Open **Settings → Community plugins → Browse**.
+2. Search for **Copy for Email** and install it.
+3. Enable it — the commands and the right-click menu item appear immediately.
+
+<details>
+<summary>Manual install</summary>
+
+Download `main.js`, `manifest.json`, `styles.css` from the [latest release](https://github.com/HWY1dot0/obsidian-copy-for-email/releases/latest) into `<vault>/.obsidian/plugins/copy-for-email/`, then enable it in **Settings → Community plugins**.
+
+</details>
+
+## More plugins by HWY1dot0
+
+- [Calendar Hub](https://github.com/HWY1dot0/calendar-hub) — one calendar that surfaces every note from a given day, in any folder.
+- [Screenshot Selection](https://github.com/HWY1dot0/obsidian-screenshot-selection) — capture selected note content as a theme-faithful PNG.
+
+If this plugin helps your workflow, you can [buy me a coffee](https://www.buymeacoffee.com/hwy1dot0).
 
 ## License
 
