@@ -1,3 +1,5 @@
+**English** | [简体中文](README.zh-CN.md)
+
 # Copy for Email
 
 Copy a selection or a whole note as **email-ready rich text**. Paste it into Gmail, Outlook, Apple Mail, Word or a WeChat official-account editor and the formatting survives — headings, tables, callouts, highlighted code, task lists, and even Mermaid diagrams and math (converted to images).
