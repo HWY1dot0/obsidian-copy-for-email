@@ -27,7 +27,7 @@ export default class CopyForEmailPlugin extends Plugin {
     // One-click alternative to the command palette: selection if there is
     // one, whole note otherwise. Users who don't want it can hide it via
     // Obsidian's own ribbon configuration.
-    this.addRibbonIcon('mail', 'Copy for email & chat (selection or note)', () => {
+    this.addRibbonIcon('mail', 'Copy for email and chat (selection or note)', () => {
       void this.copyFromRibbon();
     });
 
@@ -60,7 +60,7 @@ export default class CopyForEmailPlugin extends Plugin {
         if (!editor.getSelection().trim()) return;
         menu.addItem((item) =>
           item
-            .setTitle('Copy for email & chat')
+            .setTitle('Copy for email and chat')
             .setIcon('mail')
             .onClick(() => {
               void this.copySelection(editor, ctx);
@@ -173,7 +173,7 @@ export default class CopyForEmailPlugin extends Plugin {
     }
     if (stats.skipped.length > 0) parts.push(`${stats.skipped.length} skipped`);
     const detail = parts.length > 0 ? ` (${parts.join(', ')})` : '';
-    new Notice(`Copied for email & chat${detail}`, 3000);
+    new Notice(`Copied for email and chat${detail}`, 3000);
 
     if (htmlBytes > LARGE_CLIPBOARD_BYTES) {
       new Notice(

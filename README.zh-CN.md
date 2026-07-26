@@ -1,10 +1,10 @@
 [English](README.md) | **简体中文**
 
-# Copy for Email & Chat
+# Copy for Email and Chat
 
 把选中内容或整篇笔记复制成**可直接发邮件的富文本**。粘进 Gmail、Outlook、Apple Mail、Word 或微信公众号编辑器，排版都不会散 —— 标题、表格、callout、高亮代码、任务列表，甚至 Mermaid 图和数学公式（会转成图片）。同一次复制还带着一份**聊天可用的纯文本**：粘进微信、Slack、iMessage，得到的是结构清晰的干净文本，而不是原始 Markdown。
 
-![Copy for Email & Chat 演示 —— 选中、右键、Copy for email & chat，粘进邮件排版完好](https://raw.githubusercontent.com/HWY1dot0/obsidian-copy-for-email/main/images/demo.gif)
+![Copy for Email and Chat 演示 —— 选中、右键、Copy for email and chat，粘进邮件排版完好](https://raw.githubusercontent.com/HWY1dot0/obsidian-copy-for-email/main/images/demo.gif)
 
 从 Obsidian 直接复制出来的纯 Markdown，粘出去是一堆原始语法（`**加粗**`、`# 标题`、`| 表格 |`）。已有的"复制为 HTML"方案依赖 class 和 `<style>` 块，而邮件客户端在粘贴时会把它们剥掉。本插件换了个思路：
 
@@ -16,7 +16,7 @@
 
 ## 使用
 
-- **复制选中内容** —— 命令面板，或右键选区 → *Copy for email & chat*（编辑视图）。阅读视图里也能用：选中渲染后的文字，再执行命令。
+- **复制选中内容** —— 命令面板，或右键选区 → *Copy for email and chat*（编辑视图）。阅读视图里也能用：选中渲染后的文字，再执行命令。
 - **复制笔记** —— 复制当前笔记（不含元数据；可选在开头加上标题）。
 - **侧边按钮** —— 左侧图标栏的信封按钮：有选中就复制选中，没选中就复制整篇。
 
@@ -62,7 +62,7 @@
 ▏ Callout 正文
 ```
 
-每个记号都可以在**设置 → Copy for Email & Chat → Plain text** 里自定义：换掉任何记号，或把样式切成 **Minimal** 得到不加修饰的纯文本。表格仍是 `a | b` 行 —— 聊天的比例字体没法对齐列，表格要好看，截图仍是更诚实的选择。
+每个记号都可以在**设置 → Copy for Email and Chat → Plain text** 里自定义：换掉任何记号，或把样式切成 **Minimal** 得到不加修饰的纯文本。表格仍是 `a | b` 行 —— 聊天的比例字体没法对齐列，表格要好看，截图仍是更诚实的选择。
 
 ## 说明与限制
 
@@ -72,10 +72,10 @@
 
 ## 安装
 
-Copy for Email & Chat 已上架 Obsidian **社区插件**目录：
+Copy for Email and Chat 已上架 Obsidian **社区插件**目录：
 
 1. 打开**设置 → 第三方插件 → 浏览**。
-2. 搜索 **Copy for Email & Chat** 并安装。
+2. 搜索 **Copy for Email and Chat** 并安装。
 3. 启用后，命令和右键菜单项会立即出现。
 
 <details>
