@@ -1,10 +1,10 @@
 **English** | [简体中文](README.zh-CN.md)
 
-# Copy for Email
+# Copy for Email & Chat
 
-Copy a selection or a whole note as **email-ready rich text**. Paste it into Gmail, Outlook, Apple Mail, Word or a WeChat official-account editor and the formatting survives — headings, tables, callouts, highlighted code, task lists, and even Mermaid diagrams and math (converted to images).
+Copy a selection or a whole note as **email-ready rich text**. Paste it into Gmail, Outlook, Apple Mail, Word or a WeChat official-account editor and the formatting survives — headings, tables, callouts, highlighted code, task lists, and even Mermaid diagrams and math (converted to images). The same copy also carries a **chat-ready plain-text flavor**, so pasting into WeChat, Slack or iMessage gives clean structured text instead of raw markdown.
 
-![Copy for Email demo — select, right-click, Copy for email, paste into a mail-ready document with formatting intact](https://raw.githubusercontent.com/HWY1dot0/obsidian-copy-for-email/main/images/demo.gif)
+![Copy for Email & Chat demo — select, right-click, Copy for email & chat, paste into a mail-ready document with formatting intact](https://raw.githubusercontent.com/HWY1dot0/obsidian-copy-for-email/main/images/demo.gif)
 
 Plain markdown copied out of Obsidian pastes as raw syntax (`**bold**`, `# heading`, `| tables |`). Existing "copy as HTML" approaches rely on classes and `<style>` blocks, which mail clients strip on paste. This plugin instead:
 
@@ -12,12 +12,13 @@ Plain markdown copied out of Obsidian pastes as raw syntax (`**bold**`, `# headi
 - **Rasterizes what mail can't render**: Mermaid diagrams, charts, MathJax formulas and SVGs become embedded PNG images.
 - **Embeds vault images** as data URIs so they paste along with the text.
 - **Uses a fixed light palette** so text stays readable in a white email body even if you run a dark Obsidian theme.
-- **Writes a clean plain-text flavor too**: chat apps (WeChat, Slack, iMessage) that ignore rich text get readable text with no markdown syntax — bullets, `a | b` table rows and `☑/☐` task glyphs instead of `*`, `|`, `[x]`.
+- **Writes a chat-styled plain-text flavor too**: chat apps (WeChat, Slack, iMessage) that ignore rich text get clean text whose structure survives in glyphs — `【Heading】`, `「emphasis」`, `① ② ③` lists, `▏` quote bars — with every marker customizable in settings.
 
 ## Usage
 
-- **Copy selection** — command palette, or right-click a selection → *Copy for email* (editing view). Works in reading view too: select rendered text, then run the command.
+- **Copy selection** — command palette, or right-click a selection → *Copy for email & chat* (editing view). Works in reading view too: select rendered text, then run the command.
 - **Copy note** — copies the active note (frontmatter excluded; optionally prepends the title).
+- **Ribbon button** — the mail icon in the left ribbon copies the current selection, or the whole note when nothing is selected.
 
 Then paste into your mail compose window.
 
@@ -38,6 +39,31 @@ Then paste into your mail compose window.
 | Internal links & tags | Plain text |
 | External links | Real links |
 
+## Chat plain text
+
+Chat apps ignore the rich-text flavor entirely — WeChat, for example, supports no formatting in messages at all. So the same copy also writes a plain-text version where structure is redrawn with glyphs chat apps render fine:
+
+```
+【Note title】
+
+■ Section
+
+「Key point」 survives as visible emphasis.
+
+▍Subsection
+
+① First
+② Second
+　• nested item
+
+▏ Quoted line
+
+※ Callout title
+▏ Callout body
+```
+
+Every marker is configurable under **Settings → Copy for Email & Chat → Plain text**: swap any glyph, or switch the style to **Minimal** for undecorated plain text. Tables stay as `a | b` rows — proportional chat fonts can't align columns, so for tables a screenshot is still the honest answer.
+
 ## Notes & limitations
 
 - Pasted data-URI images work in Gmail, Apple Mail, Outlook for Mac and new Outlook. Classic Outlook for Windows may not display them while composing; recipients are unaffected when sending from the supported clients.
@@ -46,10 +72,10 @@ Then paste into your mail compose window.
 
 ## Install
 
-Copy for Email is available in the Obsidian **Community Plugins** directory:
+Copy for Email & Chat is available in the Obsidian **Community Plugins** directory:
 
 1. Open **Settings → Community plugins → Browse**.
-2. Search for **Copy for Email** and install it.
+2. Search for **Copy for Email & Chat** and install it.
 3. Enable it — the commands and the right-click menu item appear immediately.
 
 <details>
