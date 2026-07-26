@@ -1,7 +1,7 @@
 {
   "id": "copy-for-email",
-  "name": "Copy for Email & Chat",
-  "version": "0.1.3",
+  "name": "Copy for Email and Chat",
+  "version": "0.1.4",
   "minAppVersion": "1.5.0",
   "description": "Copy selections or whole notes as email-ready rich text plus chat-ready plain text. Tables, callouts, code and Mermaid diagrams survive Gmail, Outlook, Apple Mail and Word; WeChat, Slack and iMessage get clean text with visible structure.",
   "author": "HWY1dot0",
