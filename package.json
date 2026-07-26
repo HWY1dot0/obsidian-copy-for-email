@@ -1,6 +1,6 @@
 {
   "name": "obsidian-copy-for-email",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Copy Obsidian notes as email-ready rich text.",
   "main": "main.js",
   "scripts": {

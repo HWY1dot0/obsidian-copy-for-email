@@ -11,9 +11,9 @@ import {
 } from 'obsidian';
 import { writeRichClipboard } from './clipboard';
 import { buildEmailHtml, emailify, EmailifyStats, stripEmailAttributes } from './emailify';
-import { toPlainText } from './plaintext';
+import { CHAT_MARKERS, MINIMAL_MARKERS, PlainTextMarkers, toPlainText } from './plaintext';
 import { RenderedMarkdown, renderMarkdownOffscreen, renderSelectionOffscreen } from './render';
-import { CopyForEmailSettings, DEFAULT_SETTINGS } from './settings';
+import { CopyForEmailSettings, DEFAULT_SETTINGS, PT_MARKER_KEYS, PtMarkerKey } from './settings';
 
 const LARGE_CLIPBOARD_BYTES = 8 * 1024 * 1024;
 
@@ -23,6 +23,13 @@ export default class CopyForEmailPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.loadSettings();
+
+    // One-click alternative to the command palette: selection if there is
+    // one, whole note otherwise. Users who don't want it can hide it via
+    // Obsidian's own ribbon configuration.
+    this.addRibbonIcon('mail', 'Copy for email & chat (selection or note)', () => {
+      void this.copyFromRibbon();
+    });
 
     this.addCommand({
       id: 'copy-selection',
@@ -53,7 +60,7 @@ export default class CopyForEmailPlugin extends Plugin {
         if (!editor.getSelection().trim()) return;
         menu.addItem((item) =>
           item
-            .setTitle('Copy for email')
+            .setTitle('Copy for email & chat')
             .setIcon('mail')
             .onClick(() => {
               void this.copySelection(editor, ctx);
@@ -63,6 +70,24 @@ export default class CopyForEmailPlugin extends Plugin {
     );
 
     this.addSettingTab(new CopyForEmailSettingTab(this.app, this));
+  }
+
+  private async copyFromRibbon(): Promise<void> {
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (view) {
+      if (view.editor.getSelection().trim()) {
+        await this.copySelection(view.editor, view);
+        return;
+      }
+      // Reading view keeps its selection in the preview DOM, not the editor.
+      if (await this.copyDomSelection(view)) return;
+    }
+    const file = this.app.workspace.getActiveFile();
+    if (file && file.extension === 'md') {
+      await this.copyNote(file);
+      return;
+    }
+    new Notice('Open a markdown note first.');
   }
 
   private async copySelection(editor: Editor, ctx: MarkdownView | MarkdownFileInfo): Promise<void> {
@@ -119,7 +144,7 @@ export default class CopyForEmailPlugin extends Plugin {
         const rasterBg = resolveRasterBackground(rendered.wrap);
         const stats = await emailify(this.app, rendered.inner, sourcePath, this.settings, rasterBg);
         // Plain text first: it still wants the classes that strip removes.
-        const text = toPlainText(rendered.inner);
+        const text = toPlainText(rendered.inner, markersFromSettings(this.settings));
         stripEmailAttributes(rendered.inner);
         const html = buildEmailHtml(rendered.inner);
         const mode = await writeRichClipboard(html, text);
@@ -148,7 +173,7 @@ export default class CopyForEmailPlugin extends Plugin {
     }
     if (stats.skipped.length > 0) parts.push(`${stats.skipped.length} skipped`);
     const detail = parts.length > 0 ? ` (${parts.join(', ')})` : '';
-    new Notice(`Copied for email${detail}`, 3000);
+    new Notice(`Copied for email & chat${detail}`, 3000);
 
     if (htmlBytes > LARGE_CLIPBOARD_BYTES) {
       new Notice(
@@ -169,6 +194,23 @@ export default class CopyForEmailPlugin extends Plugin {
 
 function stripFrontmatter(markdown: string): string {
   return markdown.replace(/^---\r?\n[\s\S]*?\r?\n---(\r?\n|$)/, '');
+}
+
+function markersFromSettings(s: CopyForEmailSettings): PlainTextMarkers {
+  if (s.plainTextStyle === 'minimal') return MINIMAL_MARKERS;
+  return {
+    h1: [s.ptH1Prefix, s.ptH1Suffix],
+    h2: [s.ptH2Prefix, s.ptH2Suffix],
+    h3: [s.ptH3Prefix, s.ptH3Suffix],
+    h4: [s.ptH4Prefix, s.ptH4Suffix],
+    emphasis: [s.ptEmphasisPrefix, s.ptEmphasisSuffix],
+    calloutTitle: [s.ptCalloutPrefix, s.ptCalloutSuffix],
+    quoteBar: s.ptQuoteBar,
+    calloutBodyBar: s.ptQuoteBar,
+    divider: s.ptDivider,
+    circledNumbers: s.ptCircledNumbers,
+    indent: CHAT_MARKERS.indent,
+  };
 }
 
 function resolveRasterBackground(wrap: HTMLElement): string {
@@ -223,5 +265,97 @@ class CopyForEmailSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }),
       );
+
+    new Setting(containerEl).setName('Plain text').setHeading();
+
+    new Setting(containerEl)
+      .setName('Style')
+      .setDesc(
+        'Chat apps (WeChat, Slack, iMessage) paste the plain-text flavor. ' +
+          '"Chat glyphs" redraws headings, emphasis and quotes with visible markers; ' +
+          '"Minimal" keeps bare lines.',
+      )
+      .addDropdown((dd) =>
+        dd
+          .addOptions({ chat: 'Chat glyphs', minimal: 'Minimal' })
+          .setValue(this.plugin.settings.plainTextStyle)
+          .onChange(async (value) => {
+            this.plugin.settings.plainTextStyle = value === 'minimal' ? 'minimal' : 'chat';
+            await this.plugin.saveSettings();
+            this.display();
+          }),
+      );
+
+    if (this.plugin.settings.plainTextStyle === 'chat') {
+      this.addMarkerPair('Heading 1', 'ptH1Prefix', 'ptH1Suffix');
+      this.addMarkerPair('Heading 2', 'ptH2Prefix', 'ptH2Suffix');
+      this.addMarkerPair('Heading 3', 'ptH3Prefix', 'ptH3Suffix');
+      this.addMarkerPair('Headings 4–6', 'ptH4Prefix', 'ptH4Suffix');
+      this.addMarkerPair('Bold & highlight', 'ptEmphasisPrefix', 'ptEmphasisSuffix', 'Leave both empty to keep emphasis unmarked.');
+      this.addMarkerPair('Callout title', 'ptCalloutPrefix', 'ptCalloutSuffix');
+
+      new Setting(containerEl)
+        .setName('Quote bar')
+        .setDesc('Per-line prefix for quotes and callout bodies. Spacing counts.')
+        .addText((t) =>
+          t.setValue(this.plugin.settings.ptQuoteBar).onChange(async (value) => {
+            this.plugin.settings.ptQuoteBar = value;
+            await this.plugin.saveSettings();
+          }),
+        );
+
+      new Setting(containerEl)
+        .setName('Divider')
+        .setDesc('Replaces horizontal rules.')
+        .addText((t) =>
+          t.setValue(this.plugin.settings.ptDivider).onChange(async (value) => {
+            this.plugin.settings.ptDivider = value;
+            await this.plugin.saveSettings();
+          }),
+        );
+
+      new Setting(containerEl)
+        .setName('Circled numbers')
+        .setDesc('Render ordered lists as ① ② ③, falling back to "21." past twenty.')
+        .addToggle((toggle) =>
+          toggle.setValue(this.plugin.settings.ptCircledNumbers).onChange(async (value) => {
+            this.plugin.settings.ptCircledNumbers = value;
+            await this.plugin.saveSettings();
+          }),
+        );
+
+      new Setting(containerEl)
+        .setName('Restore default markers')
+        .setDesc('Reset every marker above to the built-in chat glyphs.')
+        .addButton((btn) =>
+          btn.setButtonText('Restore').onClick(async () => {
+            for (const key of PT_MARKER_KEYS) {
+              this.plugin.settings[key] = DEFAULT_SETTINGS[key];
+            }
+            this.plugin.settings.ptCircledNumbers = DEFAULT_SETTINGS.ptCircledNumbers;
+            await this.plugin.saveSettings();
+            this.display();
+          }),
+        );
+    }
+  }
+
+  // A prefix/suffix pair rendered as two side-by-side text boxes.
+  private addMarkerPair(name: string, prefixKey: PtMarkerKey, suffixKey: PtMarkerKey, desc = ''): void {
+    const setting = new Setting(this.containerEl)
+      .setName(name)
+      .addText((t) =>
+        t.setPlaceholder('prefix').setValue(this.plugin.settings[prefixKey]).onChange(async (value) => {
+          this.plugin.settings[prefixKey] = value;
+          await this.plugin.saveSettings();
+        }),
+      )
+      .addText((t) =>
+        t.setPlaceholder('suffix').setValue(this.plugin.settings[suffixKey]).onChange(async (value) => {
+          this.plugin.settings[suffixKey] = value;
+          await this.plugin.saveSettings();
+        }),
+      );
+    if (desc) setting.setDesc(desc);
   }
 }
